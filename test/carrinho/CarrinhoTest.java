@@ -4,79 +4,134 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import produto.Produto;
 import produto.ProdutoNaoEncontradoException;
 
-@DisplayName("Teste da classe Carrinho")
-public class CarrinhoTest {
+class CarrinhoTest {
 
-	private Carrinho carrinho;
-	private Produto caderno;
-	private Produto lapis;
-	private Produto mochila;
-	
-	@BeforeEach
-	public void preparaCarrinho() {
-		carrinho = new Carrinho();
-		caderno = new Produto("Caderno", 10.00);
-		lapis = new Produto("Lapis", 1.00);
-		mochila = new Produto("Mochila", 50.00);
-	}
-	
-	@Test
-	public void testRemoveProduto() throws ProdutoNaoEncontradoException {
-		carrinho.addItem(caderno);
-		carrinho.addItem(lapis);
-		carrinho.addItem(mochila);
-		
-		carrinho.removeItem(lapis);
-		
-		assertEquals(2, carrinho.getQtdeItems());
-		assertEquals(60.00, carrinho.getValorTotal(), 0.001);
-	}
-	
-	@Test
-	public void testValorTotalComDoisProdutos() {
-		carrinho.addItem(caderno);
-		carrinho.addItem(lapis);
-		
-		assertEquals(11.00, carrinho.getValorTotal(), 0.001);
-	}
-	
-	@Test
-	public void testProdutoAusenteLancaExcecao() {
-		carrinho.addItem(caderno);
-		
-		assertThrows(ProdutoNaoEncontradoException.class,
-				() -> carrinho.removeItem(mochila));
-	}
-	
-	@Test
-	public void testCarrinhoNovo() {
-		assertEquals(0, carrinho.getQtdeItems());
-		assertEquals(0.0, carrinho.getValorTotal(), 0.001);
-	}
-	
-	@Test
-	public void testEsvaziaDepoisDeAdicionar() {
-		carrinho.addItem(mochila);
-		carrinho.addItem(caderno);
-		
-		carrinho.esvazia();
-		
-		assertEquals(0, carrinho.getQtdeItems());
-		assertEquals(0.0, carrinho.getValorTotal(), 0.001);
-	}
-	
-	@Test
-	public void testAdicionaProdutoRepetido() {
-		carrinho.addItem(lapis);
-		carrinho.addItem(lapis);
-		
-		assertEquals(2, carrinho.getQtdeItems());
-		assertEquals(2.00, carrinho.getValorTotal(), 0.001);
-	}
+    private Carrinho carrinho;
+
+    @BeforeEach
+    void setUp() {
+        carrinho = new Carrinho();
+    }
+
+    @Test
+    void deveCriarCarrinhoVazio() {
+        assertEquals(0, carrinho.getQtdeItems());
+        assertEquals(0.0, carrinho.getValorTotal(), 0.001);
+    }
+
+    @Test
+    void deveAdicionarUmItem() {
+        Produto produto = new Produto("Produto 1", 10.0);
+
+        carrinho.addItem(produto);
+
+        assertEquals(1, carrinho.getQtdeItems());
+    }
+
+    @Test
+    void deveAdicionarMultiplosItens() {
+        Produto produto1 = new Produto("Produto 1", 10.0);
+        Produto produto2 = new Produto("Produto 2", 20.0);
+        Produto produto3 = new Produto("Produto 3", 30.0);
+
+        carrinho.addItem(produto1);
+        carrinho.addItem(produto2);
+        carrinho.addItem(produto3);
+
+        assertEquals(3, carrinho.getQtdeItems());
+    }
+
+    @Test
+    void deveCalcularValorTotalComUmItem() {
+        Produto produto = new Produto("Produto 1", 10.0);
+
+        carrinho.addItem(produto);
+
+        assertEquals(10.0, carrinho.getValorTotal(), 0.001);
+    }
+
+    @Test
+    void deveCalcularValorTotalComMultiplosItens() {
+        Produto produto1 = new Produto("Produto 1", 10.0);
+        Produto produto2 = new Produto("Produto 2", 20.0);
+        Produto produto3 = new Produto("Produto 3", 30.0);
+
+        carrinho.addItem(produto1);
+        carrinho.addItem(produto2);
+        carrinho.addItem(produto3);
+
+        assertEquals(60.0, carrinho.getValorTotal(), 0.001);
+    }
+
+    @Test
+    void deveRemoverItemExistente() throws ProdutoNaoEncontradoException {
+        Produto produto = new Produto("Produto 1", 10.0);
+        carrinho.addItem(produto);
+
+        carrinho.removeItem(produto);
+
+        assertEquals(0, carrinho.getQtdeItems());
+    }
+
+    @Test
+    void deveAtualizarValorTotalAposRemoverItem() throws ProdutoNaoEncontradoException {
+        Produto produto1 = new Produto("Produto 1", 10.0);
+        Produto produto2 = new Produto("Produto 2", 20.0);
+
+        carrinho.addItem(produto1);
+        carrinho.addItem(produto2);
+
+        carrinho.removeItem(produto1);
+
+        assertEquals(20.0, carrinho.getValorTotal(), 0.001);
+        assertEquals(1, carrinho.getQtdeItems());
+    }
+
+    @Test
+    void deveLancarExcecaoAoRemoverItemInexistente() {
+        Produto produto = new Produto("Produto 1", 10.0);
+
+        assertThrows(
+            ProdutoNaoEncontradoException.class,
+            () -> carrinho.removeItem(produto)
+        );
+    }
+
+    @Test
+    void deveEsvaziarCarrinho() {
+        Produto produto1 = new Produto("Produto 1", 10.0);
+        Produto produto2 = new Produto("Produto 2", 20.0);
+
+        carrinho.addItem(produto1);
+        carrinho.addItem(produto2);
+
+        carrinho.esvazia();
+
+        assertEquals(0, carrinho.getQtdeItems());
+        assertEquals(0.0, carrinho.getValorTotal(), 0.001);
+    }
+
+    @Test
+    void devePermitirEsvaziarCarrinhoJaVazio() {
+        carrinho.esvazia();
+
+        assertEquals(0, carrinho.getQtdeItems());
+        assertEquals(0.0, carrinho.getValorTotal(), 0.001);
+    }
+
+    @Test
+    void devePermitirAdicionarMesmoProdutoMaisDeUmaVez() {
+        Produto produto = new Produto("Produto 1", 10.0);
+
+        carrinho.addItem(produto);
+        carrinho.addItem(produto);
+
+        assertEquals(2, carrinho.getQtdeItems());
+        assertEquals(20.0, carrinho.getValorTotal(), 0.001);
+    }
 }
